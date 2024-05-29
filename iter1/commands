@@ -1,0 +1,6 @@
+curl -XPOST Master:8080/append -d'{"msg": "hello"}'
+echo m; curl Master:8080/list; echo s1; curl Secondary1:8080/list; echo s2; curl Secondary2:8080/list
+
+docker run -it --rm --network=dist_system_lab_network -v$(pwd):/home -w/home --name Master python:3 bash
+docker run -it --rm --network=dist_system_lab_network -v$(pwd):/home -w/home --name Secondary1 python:3 bash
+docker run -it --rm --network=dist_system_lab_network -v$(pwd):/home -w/home --name Secondary2 python:3 bash

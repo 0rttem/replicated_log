@@ -1,0 +1,14 @@
+curl -XPOST Master:8080/append -d'{"msg": "hello"}'
+echo m; curl Master:8080/list; echo s1; curl Secondary1:8080/list; echo s2; curl Secondary2:8080/list
+echo m; curl Master:8080/list | wc -l; echo s1; curl Secondary1:8080/list | wc -l; echo s2; curl Secondary2:8080/list | wc -l
+
+docker run -it --rm --network=dist_system_lab_network -v$(pwd):/home -w/home --cap-add=NET_ADMIN --name Master python:3 bash
+docker run -it --rm --network=dist_system_lab_network -v$(pwd):/home -w/home --cap-add=NET_ADMIN --name Secondary1 python:3 bash
+docker run -it --rm --network=dist_system_lab_network -v$(pwd):/home -w/home --cap-add=NET_ADMIN --name Secondary2 python:3 bash
+
+pstree -ahlnpst $(ps aux| grep 'python3 Master.py' | awk '{ print $2 }' | head -n1)
+
+docker exec -it Master bash -c "apt-get update >/dev/null; apt-get install iptables -y > /dev/null; ip='Secondary1'; iptables -A INPUT -s \$ip -j DROP && iptables -A INPUT -d \$ip -j DROP; iptables -S"
+docker exec -it Master bash -c "iptables -D INPUT 1; iptables -D INPUT 1; iptables -S"
+
+pip3 install sortedcontainers
